@@ -32,12 +32,17 @@ class Mumps < Formula
     sha256 "87d1fc87eb04cfa1cba0ca0a18f051b348a93b0b2c2e97279b23994664ee437e"
   end
 
+  CC=OS.mac? ? "clang" : "gcc"
+  FC="gfortran"
+  MPICC="mpicc"
+  MPIFC="mpif90"
+
   def install
     make_args = ["RANLIB=echo"]
     if OS.mac?
       # Building dylibs with mpif90 causes segfaults on 10.8 and 10.10. Use gfortran.
       shlibs_args = ["LIBEXT=.dylib",
-                     "AR=#{ENV["FC"]} -dynamiclib -Wl,-install_name -Wl,#{lib}/$(notdir $@) -undefined dynamic_lookup -o "]
+                     "AR=#{FC} -dynamiclib -Wl,-install_name -Wl,#{lib}/${@##*/} -undefined dynamic_lookup -o "]
     else
       shlibs_args = ["LIBEXT=.so",
                      "AR=$(FL) -shared -Wl,-soname -Wl,$(notdir $@) -o "]
@@ -95,16 +100,16 @@ class Mumps < Formula
     make_args << "ORDERINGSF=#{orderingsf}"
 
     if build.with? "open-mpi"
-      make_args += ["CC=#{ENV["MPICC"]} -fPIC",
-                    "FC=#{ENV["MPIFC"]} -fPIC",
-                    "FL=#{ENV["MPIFC"]} -fPIC",
+      make_args += ["CC=#{MPICC} -fPIC",
+                    "FC=#{MPIFC} -fPIC",
+                    "FL=#{MPIFC} -fPIC",
                     "SCALAP=-L#{Formula["scalapack"].opt_lib} -lscalapack",
                     "INCPAR=", # Let MPI compilers fill in the blanks.
-                    "LIBPAR=$(SCALAP)"]
+                    "LIBPAR=-L#{Formula["scalapack"].opt_lib} -lscalapack"]
     else
-      make_args += ["CC=#{ENV["CC"]} -fPIC",
-                    "FC=#{ENV["FC"]} -fPIC",
-                    "FL=#{ENV["FC"]} -fPIC"]
+      make_args += ["CC=#{CC} -fPIC",
+                    "FC=#{FC} -fPIC",
+                    "FL=#{FC} -fPIC"]
     end
 
     if build.with? "openblas"
@@ -147,7 +152,7 @@ class Mumps < Formula
 
     if build.with? "open-mpi"
       resource("mumps_simple").stage do
-        simple_args = ["CC=#{ENV["MPICC"]}", "prefix=#{prefix}", "mumps_prefix=#{prefix}",
+        simple_args = ["CC=#{MPICC}", "prefix=#{prefix}", "mumps_prefix=#{prefix}",
                        "scalapack_libdir=#{Formula["scalapack"].opt_lib}"]
         if build.with? "scotch5"
           simple_args += ["scotch_libdir=#{Formula["scotch5"].opt_lib}",
@@ -200,8 +205,8 @@ class Mumps < Formula
       mpirun = "mpirun -np 2"
       opts << "-lscalapack"
     else
-      f90 = ENV["FC"]
-      cc = ENV["CC"]
+      f90 = "gfortran"
+      cc = CC
       mpirun = ""
     end
 
