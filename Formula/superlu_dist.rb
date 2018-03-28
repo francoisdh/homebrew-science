@@ -11,6 +11,11 @@ class SuperluDist < Formula
   option "with-openmp", "Enable OpenMP multithreading"
   needs :openmp if build.with? "openmp"
 
+  MPICC="mpicc"
+  MPICXX="mpicxx"
+  MPIF77="mpif77"
+  MPIFC="mpif90"
+
   depends_on "cmake" => :build
   depends_on "gcc" if OS.mac? # for gfortran
   depends_on "open-mpi"
@@ -30,8 +35,8 @@ class SuperluDist < Formula
     cmake_args << "-DTPL_PARMETIS_INCLUDE_DIRS=#{Formula["parmetis"].opt_include};#{Formula["metis"].opt_include}"
     cmake_args << "-DCMAKE_C_FLAGS=-fPIC -O2"
     cmake_args << "-DBUILD_SHARED_LIBS=ON"
-    cmake_args << "-DCMAKE_C_COMPILER=#{ENV["MPICC"]}"
-    cmake_args << "-DCMAKE_Fortran_COMPILER=#{ENV["MPIF90"]}"
+    cmake_args << "-DCMAKE_C_COMPILER=#{MPICC}"
+    cmake_args << "-DCMAKE_Fortran_COMPILER=#{MPIF90}"
     cmake_args << "-DCMAKE_INSTALL_PREFIX=#{prefix}"
 
     blaslib = ((build.with? "openblas") ? "-L#{Formula["openblas"].opt_lib} -lopenblas" : "-L#{Formula["veclibfort"].opt_lib} -lvecLibFort")
