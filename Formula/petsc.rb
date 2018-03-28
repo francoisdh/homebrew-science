@@ -17,6 +17,11 @@ class Petsc < Formula
   deprecated_option "complex" => "with-complex"
   deprecated_option "debug"   => "with-debug"
 
+  MPICC="mpicc"
+  MPICXX="mpicxx"
+  MPIF77="mpif77"
+  MPIFC="mpif90"
+
   depends_on "gcc" if OS.mac? # for gfortran
   depends_on :x11 => :optional
   depends_on "cmake" => :build
@@ -57,10 +62,10 @@ class Petsc < Formula
     ENV.delete "F77"
     ENV.delete "FC"
     # PETSc is not threadsafe, disable pthread/openmp (see http://www.mcs.anl.gov/petsc/miscellaneous/petscthreads.html)
-    args = %W[CC=#{ENV["MPICC"]}
-              CXX=#{ENV["MPICXX"]}
-              F77=#{ENV["MPIF77"]}
-              FC=#{ENV["MPIFC"]}
+    args = %W[CC=#{MPICC}
+              CXX=#{MPICXX}
+              F77=#{MPIF77}
+              FC=#{MPIFC}
               --with-shared-libraries=1
               --with-pthread=0
               --with-openmp=0]
